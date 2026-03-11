@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictées Amusantes</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=DM+Serif+Display&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #faf9f6;
+  --card: #ffffff;
+  --text: #1a1a1a;
+  --text-muted: #6b6b6b;
+  --accent: #c0392b;
+  --accent-light: #e74c3c;
+  --accent-bg: #fef0ee;
+  --green: #27ae60;
+  --green-bg: #eafaf1;
+  --orange: #e67e22;
+  --orange-bg: #fef5e7;
+  --border: #e8e6e1;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.container { max-width: 860px; margin: 0 auto; padding: 20px; }
+
+header {
+  text-align: left;
+  padding: 40px 0 30px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+
+header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.2rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+header p { color: var(--text-muted); font-size: 0.95rem; }
+
+.dictee-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.dictee-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 22px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dictee-card:hover {
+  border-color: #ccc;
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+.dictee-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.3rem;
+  color: var(--accent);
+  min-width: 32px;
+}
+
+.dictee-info { flex: 1; }
+.dictee-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 2px; }
+.dictee-info p { font-size: 0.85rem; color: var(--text-muted); }
+
+.dictee-theme {
+  font-size: 0.75rem;
+  background: var(--accent-bg);
+  color: var(--accent);
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 0;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.back-btn:hover { color: var(--text); }
+
+.level-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.level-btn {
+  flex: 1;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.level-btn:hover { border-color: #ccc; }
+
+.level-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.level-label { display: block; margin-bottom: 2px; }
+.level-desc { font-size: 0.78rem; color: var(--text-muted); font-weight: 400; }
+
+.player-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+.player-section h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.play-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.play-btn:hover { background: var(--accent-light); }
+.play-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.play-btn.stop { background: #555; }
+.play-btn.stop:hover { background: #333; }
+
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.speed-control label { font-size: 0.85rem; color: var(--text-muted); }
+
+.speed-select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  background: white;
+  cursor: pointer;
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mode-btn.active {
+  background: #333;
+  color: white;
+  border-color: #333;
+}
+
+.writing-area {
+  margin-bottom: 20px;
+}
+
+.writing-area textarea {
+  width: 100%;
+  min-height: 220px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  line-height: 1.8;
+  resize: vertical;
+  background: var(--card);
+  transition: border-color 0.15s ease;
+}
+
+.writing-area textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.writing-area textarea::placeholder { color: #bbb; }
+
+.submit-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 32px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  width: 100%;
+}
+
+.submit-btn:hover { background: var(--accent-light); }
+
+/* Correction */
+.correction-container {
+  margin-top: 20px;
+}
+
+.grade-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.grade-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-family: 'DM Serif Display', serif;
+  font-size: 2rem;
+}
+
+.grade-circle.excellent { background: var(--green-bg); color: var(--green); border: 3px solid var(--green); }
+.grade-circle.good { background: #e8f5e9; color: #388e3c; border: 3px solid #66bb6a; }
+.grade-circle.ok { background: var(--orange-bg); color: var(--orange); border: 3px solid var(--orange); }
+.grade-circle.poor { background: var(--accent-bg); color: var(--accent); border: 3px solid var(--accent); }
+
+.grade-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
+  text-align: left;
+}
+
+.grade-detail-card {
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+
+.grade-detail-card h4 { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.grade-detail-card .score { font-family: 'DM Serif Display', serif; font-size: 1.5rem; }
+
+.correction-text {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 22px;
+  margin-bottom: 16px;
+}
+
+.correction-text h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.correction-line {
+  line-height: 2;
+  font-size: 1rem;
+}
+
+.word-correct { color: var(--text); }
+.word-error {
+  background: #fce4e4;
+  color: var(--accent);
+  padding: 2px 4px;
+  border-radius: 3px;
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.word-expected {
+  background: var(--green-bg);
+  color: var(--green);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.word-missing {
+  background: var(--orange-bg);
+  color: var(--orange);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-style: italic;
+}
+
+.errors-list {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 22px;
+}
+
+.errors-list h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.error-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.error-item:last-child { border-bottom: none; }
+
+.error-item .error-words {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.error-item .error-type {
+  font-size: 0.78rem;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-right: 8px;
+  font-weight: 500;
+}
+
+.error-type.usage { background: var(--orange-bg); color: var(--orange); }
+.error-type.grammar { background: #e8eaf6; color: #3f51b5; }
+
+.error-item .error-explanation {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.no-errors {
+  text-align: center;
+  padding: 30px;
+  color: var(--green);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.retry-btn {
+  background: var(--card);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 32px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 12px;
+  transition: all 0.15s ease;
+}
+
+.retry-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-left: 12px;
+}
+
+@media (max-width: 600px) {
+  header h1 { font-size: 1.6rem; }
+  .level-selector { flex-direction: column; }
+  .player-controls { flex-direction: column; align-items: stretch; }
+  .speed-control { margin-left: 0; justify-content: space-between; }
+  .grade-details { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ===== BANQUE DE 15 DICTÉES × 3 NIVEAUX =====
+const DICTEES = [
+  {
+    id: 1, titre: "Le chat astronaute", theme: "Espace",
+    niveaux: {
+      1: "Mon chat Réglisse rêve de voyager dans l'espace. Chaque soir, il grimpe sur le toit et observe les étoiles brillantes. Il porte un petit casque en carton que j'ai fabriqué pour lui. Ses moustaches tremblent de joie quand il voit la lune. Il saute sur les meubles en faisant semblant de flotter. Ma mère dit qu'il est le plus drôle des chats du quartier. Un jour, je lui ai montré une fusée dans un livre. Il a posé sa patte dessus et a miaulé très fort. Je crois qu'il est prêt pour le décollage.",
+      2: "Mon chat Réglisse rêvait depuis longtemps de voyager dans l'espace. Chaque soir, il grimpait sur le toit et observait les étoiles scintillantes avec attention. Je lui avais fabriqué un petit casque en carton argenté qu'il portait fièrement. Ses longues moustaches tremblaient de joie lorsqu'il apercevait la pleine lune. Il bondissait sur les meubles en prétendant flotter dans l'apesanteur. Ma mère affirmait qu'il était le plus amusant des chats qu'elle avait connus. Un jour, je lui ai montré une fusée photographiée dans un livre. Il a posé ses pattes dessus et a miaulé puissamment, comme s'il réclamait son billet.",
+      3: "Mon chat Réglisse, qui rêvait depuis toujours de conquérir l'espace intersidéral, grimpait chaque soir sur le toit afin d'observer les constellations scintillantes. Je lui avais confectionné un casque en carton argenté qu'il arborait fièrement, bien qu'il fût légèrement trop grand pour sa tête. Ses moustaches frémissaient d'excitation lorsqu'il apercevait la lune, et il bondissait sur les meubles en simulant l'apesanteur. Ma mère prétendait qu'il n'existait pas de chat plus excentrique dans tout le voisinage. Quand je lui ai présenté la photographie d'une fusée, il y a apposé ses pattes veloutées et a émis un miaulement si retentissant que les voisins se sont inquiétés."
+    }
+  },
+  {
+    id: 2, titre: "La pizza magique", theme: "Cuisine",
+    niveaux: {
+      1: "Ce matin, j'ai trouvé une pizza magique dans le frigo. Elle parle et elle chante des chansons italiennes. Quand je veux la manger, elle se met à crier. Mon père pense que je suis fou, mais la pizza lui a récité un poème. Ma sœur veut l'emmener à l'école pour son exposé. La pizza préfère rester au chaud dans la cuisine. Elle raconte des blagues à notre chien qui remue la queue. Le fromage sur le dessus change de couleur selon son humeur. Hier soir, elle était bleue parce qu'on avait mangé des pâtes sans elle.",
+      2: "Ce matin, j'ai découvert une pizza extraordinaire dans notre vieux réfrigérateur. Elle parlait couramment et chantait des mélodies italiennes avec une voix envoûtante. Chaque fois que je tentais de la manger, elle poussait des cris perçants. Mon père pensait que j'avais perdu la raison, jusqu'à ce que la pizza lui récite un poème de Victor Hugo. Ma petite sœur souhaitait l'emmener à l'école pour sa prochaine présentation orale. La pizza préférait cependant rester bien au chaud dans notre cuisine. Elle racontait des plaisanteries à notre chien, qui remuait la queue joyeusement. Son fromage changeait de couleur selon ses humeurs passagères.",
+      3: "Ce matin, j'ai découvert une pizza aux propriétés extraordinaires dissimulée au fond de notre réfrigérateur vieillissant. Elle s'exprimait couramment en plusieurs langues et interprétait des arias italiennes d'une voix envoûtante. Chaque fois que je m'approchais dans l'intention de la déguster, elle poussait des cris si perçants que les vitres en tremblaient. Mon père, qui avait longtemps cru que j'affabulais, dut se rendre à l'évidence lorsqu'elle lui récita un sonnet qu'aucun de nous ne connaissait. Bien que ma sœur eût souhaité l'emmener à son école, la pizza a catégoriquement refusé, prétextant qu'elle craignait d'être dévorée par des enfants affamés."
+    }
+  },
+  {
+    id: 3, titre: "Le dinosaure au supermarché", theme: "Aventure",
+    niveaux: {
+      1: "Un dinosaure est entré dans le supermarché hier après-midi. Il portait un chapeau et des lunettes de soleil. Les clients ont crié en le voyant, mais il voulait juste acheter des bananes. La caissière lui a demandé sa carte de fidélité. Le dinosaure a fouillé dans ses petites poches et a trouvé un vieux bonbon. Il a rempli son chariot de fruits et de légumes frais. Sa longue queue renversait les boîtes de conserve dans les allées. Le gérant du magasin lui a demandé de faire attention. Le dinosaure a promis de revenir samedi prochain.",
+      2: "Un énorme dinosaure est entré dans le supermarché hier après-midi, provoquant une panique générale. Il portait un chapeau élégant et des lunettes de soleil dorées. Les clients terrifiés ont crié en l'apercevant, mais il souhaitait simplement acheter des bananes et quelques avocats. La caissière étonnée lui a demandé sa carte de fidélité avec un sourire nerveux. Le dinosaure a fouillé dans ses minuscules poches sans rien trouver d'utile. Il a ensuite rempli son chariot de fruits tropicaux et de légumes biologiques. Sa longue queue balayait les boîtes de conserve empilées dans les allées étroites. Le gérant exaspéré lui a poliment demandé de faire plus attention aux présentoirs.",
+      3: "Un tyrannosaure d'apparence distinguée a fait irruption dans le supermarché hier après-midi, provoquant une panique aussi soudaine qu'injustifiée parmi la clientèle. Bien qu'il portât un chapeau de feutre et des lunettes de soleil à monture dorée, sa silhouette préhistorique ne passait pas inaperçue. Les clients horrifiés ont poussé des hurlements, alors qu'il ne souhaitait qu'acquérir quelques bananes et des avocats bien mûrs. La caissière interloquée lui a néanmoins demandé sa carte de fidélité, comme l'exigeait le règlement. Le dinosaure, après avoir fouillé ses poches ridiculement petites, n'y a trouvé qu'un vieux bonbon à la menthe. Il aurait fallu que le gérant élargisse ses allées avant de se plaindre."
+    }
+  },
+  {
+    id: 4, titre: "La sorcière végétarienne", theme: "Fantastique",
+    niveaux: {
+      1: "La sorcière Gertrude a décidé de devenir végétarienne. Elle ne met plus de crapauds dans ses potions. À la place, elle utilise des carottes et du persil frais. Ses collègues sorcières trouvent cela très bizarre. Son chat noir refuse de manger la soupe aux légumes. Les potions vertes ont maintenant un goût de brocoli. Le village entier se porte mieux depuis ce changement. Les enfants adorent ses nouvelles recettes et viennent souvent la visiter. Gertrude vend ses potions au marché chaque dimanche. Elle a même gagné un prix au concours de cuisine magique.",
+      2: "La vieille sorcière Gertrude a récemment décidé de devenir entièrement végétarienne. Elle ne met désormais plus aucun crapaud ni aucune araignée dans ses préparations magiques. À la place, elle utilise des carottes biologiques et du persil fraîchement cueilli dans son jardin enchanté. Ses anciennes collègues sorcières, choquées par cette décision, la trouvent franchement bizarre. Son chat noir, habitué aux souris, refuse catégoriquement de goûter la soupe aux légumes qu'elle prépare. Les potions verdâtres qu'elle concocte ont désormais un goût prononcé de brocoli. Cependant, le village se porte considérablement mieux depuis ces changements alimentaires surprenants.",
+      3: "La sorcière Gertrude, lassée des traditions ancestrales qu'elle jugeait dépassées, a pris la résolution irrévocable de devenir végétarienne. Elle ne tolérerait désormais ni crapauds visqueux ni araignées velues dans ses préparations. Ses collègues, scandalisées qu'elle osât bouleverser des recettes transmises depuis des générations, l'ont exclue de leur assemblée nocturne. Son chat noir, accoutumé aux ingrédients conventionnels, refusait obstinément la soupe aux légumes qu'elle lui servait. Bien que les potions eussent acquis un goût prononcé de brocoli, leurs effets thérapeutiques s'étaient considérablement améliorés. Il faudrait que les autres sorcières reconnaissent les bienfaits de cette approche novatrice avant qu'il ne soit trop tard."
+    }
+  },
+  {
+    id: 5, titre: "Le robot amoureux", theme: "Science-fiction",
+    niveaux: {
+      1: "Le petit robot Zéro est tombé amoureux de la machine à café. Il lui apporte des fleurs en métal chaque matin. La machine à café rougit et fait couler un espresso. Les autres robots de la maison trouvent cela amusant. Le grille-pain est un peu jaloux de cette histoire. Zéro écrit des poèmes avec ses circuits et les récite le soir. Ma grand-mère adore ce robot parce qu'elle boit plus de café. Le réfrigérateur joue de la musique douce pour les deux amoureux. Papa dit que les robots ne peuvent pas aimer, mais moi je n'en suis pas sûr.",
+      2: "Le petit robot domestique Zéro est mystérieusement tombé amoureux de notre machine à café italienne. Il lui apportait quotidiennement des fleurs délicates fabriquées en métal recyclé. La machine rougissait alors et faisait couler un espresso parfumé en guise de remerciement. Les autres appareils électroniques observaient cette romance naissante avec curiosité. Le grille-pain, secrètement jaloux, grillait les toasts trop longtemps par frustration. Zéro composait des poèmes numériques qu'il récitait chaque soir avec émotion. Ma grand-mère profitait largement de cette situation, puisqu'elle recevait davantage de cafés gratuits. Le réfrigérateur bienveillant diffusait des mélodies romantiques pour accompagner leurs retrouvailles quotidiennes.",
+      3: "Le robot domestique Zéro, dont les circuits émotionnels avaient mystérieusement évolué, est tombé éperdument amoureux de notre machine à café italienne. Chaque matin, il lui présentait des bouquets métalliques qu'il avait minutieusement façonnés à partir de matériaux recyclés. La machine, bien qu'elle ne possédât aucune programmation sentimentale, rougissait inexplicablement et produisait un espresso d'une qualité exceptionnelle. Les appareils électroménagers, intrigués par cette romance inattendue, l'observaient avec une fascination croissante. Le grille-pain, rongé par une jalousie qu'il n'aurait su expliquer, carbonisait systématiquement les tartines. Il aurait fallu que quelqu'un intervînt avant que la cuisine ne devînt un théâtre de passions incontrôlables."
+    }
+  },
+  {
+    id: 6, titre: "La journée à l'envers", theme: "Humour",
+    niveaux: {
+      1: "Aujourd'hui, tout se passe à l'envers dans ma famille. Papa mange le dessert avant la soupe. Ma sœur marche à reculons pour aller à l'école. Le chien aboie en silence et le chat miaule très fort. Maman porte son pyjama au bureau et personne ne dit rien. Je fais mes devoirs avant que le professeur les donne. Mon frère se brosse les dents avec de la moutarde jaune. Grand-père lit son journal du bas vers le haut. La pluie tombe vers le ciel et les oiseaux nagent dans la rivière. C'est une journée vraiment spéciale.",
+      2: "Aujourd'hui, absolument tout se déroule à l'envers dans notre famille. Mon père mange tranquillement son dessert au chocolat avant de toucher à la soupe. Ma petite sœur marche à reculons en direction de l'école, persuadée que c'est plus rapide. Notre chien aboie silencieusement tandis que le chat miaule si fort que les voisins se plaignent. Maman, vêtue de son pyjama fleuri, est partie travailler au bureau sans que personne n'ose rien dire. J'ai terminé mes devoirs de mathématiques avant même que le professeur ne les distribue. Mon frère s'est brossé les dents avec de la moutarde, affirmant que le goût était meilleur.",
+      3: "Aujourd'hui, l'ordre naturel des choses s'est mystérieusement inversé dans notre maisonnée. Mon père, qui n'avait jamais dérogé aux conventions culinaires, a englouti son dessert au chocolat avant d'avoir effleuré sa soupe. Ma sœur, convaincue qu'elle arriverait plus rapidement à destination, parcourait le trajet vers l'école à reculons. Notre chien, dont les aboiements habituels résonnaient dans tout le quartier, n'émettait qu'un souffle silencieux, tandis que le chat poussait des miaulements si retentissants que les voisins se sont plaints auprès de la municipalité. Bien que maman fût partie au bureau vêtue de son pyjama, aucun de ses collègues n'a osé formuler la moindre remarque. Il semblerait que l'univers entier eût décidé de fonctionner selon ses propres règles."
+    }
+  },
+  {
+    id: 7, titre: "Le poisson philosophe", theme: "Animaux",
+    niveaux: {
+      1: "Notre poisson rouge Socrate pense beaucoup. Il tourne dans son bocal en réfléchissant à la vie. Mon frère lui pose des questions et attend les réponses. Socrate fait des bulles quand il est d'accord. Il refuse de manger quand il réfléchit à un problème difficile. Les autres poissons de l'animalerie étaient moins intelligents. Ma mère a acheté un livre de philosophie et l'a posé contre le bocal. Socrate l'a lu en trois jours, je pense. Maintenant, il nage seulement dans le sens contraire des aiguilles d'une montre. Papa dit que c'est un poisson normal, mais je sais qu'il a tort.",
+      2: "Notre poisson rouge, que nous avons nommé Socrate, semble posséder une intelligence remarquable. Il tourne lentement dans son bocal en réfléchissant visiblement aux grandes questions existentielles. Mon frère cadet lui pose régulièrement des questions philosophiques et attend patiemment ses réponses aquatiques. Socrate produit des bulles précises quand il approuve une proposition. Il refuse obstinément de s'alimenter lorsqu'il se concentre sur un problème particulièrement complexe. Ma mère, intriguée par son comportement, a placé un ouvrage de philosophie contre la paroi du bocal. Socrate semblait l'avoir parcouru intégralement en quelques jours seulement. Désormais, il nage exclusivement dans le sens contraire des aiguilles d'une montre.",
+      3: "Notre poisson rouge, auquel nous avons attribué le nom de Socrate en raison de son comportement singulièrement contemplatif, semble doté d'une intelligence qui dépasse l'entendement. Il effectue d'interminables révolutions dans son bocal, apparemment absorbé par des réflexions d'ordre métaphysique. Mon frère, qui lui soumettait quotidiennement des interrogations philosophiques, prétendait interpréter ses réponses bulleuses avec une précision déconcertante. Socrate refusait obstinément de s'alimenter tant qu'il n'avait pas résolu le problème existentiel auquel il s'attelait. Bien que ma mère eût disposé un ouvrage de Descartes contre la paroi vitrée, nous ne saurions affirmer avec certitude qu'il l'a effectivement lu. Il aurait néanmoins fallu reconnaître que ses comportements dépassaient de loin ceux d'un poisson ordinaire."
+    }
+  },
+  {
+    id: 8, titre: "L'extraterrestre en vacances", theme: "Espace",
+    niveaux: {
+      1: "Un extraterrestre vert est arrivé dans notre jardin mardi dernier. Il voulait passer ses vacances sur la Terre. Il trouve nos arbres magnifiques et nos fleurs extraordinaires. Il a goûté une pomme et a fait une drôle de grimace. Il dort dans la cabane du fond du jardin avec les outils. Le matin, il boit du jus d'orange avec une paille très longue. Il porte les vieux vêtements de mon père qui sont trop grands. Les voisins pensent que c'est un cousin éloigné de notre famille. Il repart sur sa planète dimanche soir après le souper.",
+      2: "Un extraterrestre d'un vert éclatant a atterri dans notre jardin mardi dernier, provoquant une surprise considérable. Il souhaitait passer ses premières vacances terrestres dans notre quartier paisible. Il trouvait nos arbres centenaires absolument magnifiques et nos fleurs sauvages extraordinairement parfumées. Lorsqu'il a croqué dans une pomme juteuse, il a fait une grimace si comique que nous avons tous éclaté de rire. Il dormait confortablement dans la vieille cabane du fond du jardin, parmi les outils rouillés de mon grand-père. Chaque matin, il buvait son jus d'orange frais avec une paille démesurément longue. Les voisins curieux pensaient qu'il s'agissait d'un cousin éloigné arrivé récemment de l'étranger.",
+      3: "Un extraterrestre d'un vert phosphorescent a atterri sans crier gare dans notre jardin mardi dernier, provoquant un émoi considérable dans le voisinage. Il avait entrepris de passer ses toutes premières vacances terrestres dans notre quartier, qu'il jugeait remarquablement pittoresque. Les arbres centenaires qui bordaient notre propriété l'émerveillaient, de même que les fleurs sauvages dont il humait inlassablement le parfum. Lorsqu'il croqua dans une pomme, la grimace qu'il esquissa était si désopilante que nous ne pûmes retenir nos éclats de rire. Bien qu'il se fût installé parmi les outils rouillés de la cabane, il prétendait que cet hébergement surpassait les hôtels intergalactiques auxquels il était accoutumé. Il aurait souhaité prolonger son séjour, mais ses obligations cosmiques le rappelaient."
+    }
+  },
+  {
+    id: 9, titre: "Le fantôme timide", theme: "Fantastique",
+    niveaux: {
+      1: "Le fantôme de notre grenier est très timide. Il rougit quand quelqu'un le regarde. Il se cache derrière les vieux meubles et les grosses malles. La nuit, il essaie de faire peur, mais il bégaie tellement que personne n'a peur. Ma sœur lui a tricoté une écharpe invisible pour lui faire plaisir. Il la porte tous les jours même en été. Parfois, il laisse des petits mots gentils sur la table de la cuisine. Son écriture tremble un peu parce qu'il est nerveux. Nous l'avons appelé Gaston et il fait maintenant partie de la famille.",
+      2: "Le fantôme qui habite notre vieux grenier depuis des décennies est incroyablement timide. Il rougit violemment dès que quelqu'un pose les yeux sur lui, ce qui est assez remarquable pour un être transparent. Il se dissimule derrière les meubles poussiéreux et les malles oubliées. La nuit, il tente vaillamment de faire peur aux visiteurs, mais il bégaie si terriblement que personne ne le prend au sérieux. Ma sœur compatissante lui a tricoté une longue écharpe invisible qu'il porte fièrement en toutes saisons. Il dépose régulièrement des petits mots affectueux sur notre table de cuisine. Nous l'avons surnommé Gaston et il fait désormais partie intégrante de notre famille recomposée.",
+      3: "Le fantôme qui occupe notre grenier depuis plusieurs décennies souffre d'une timidité si prononcée qu'elle en devient attendrissante. Il rougissait violemment — phénomène inexplicable pour un être immatériel — dès que quelqu'un l'apercevait parmi les meubles poussiéreux. Bien qu'il s'efforçât chaque nuit de terrifier les occupants de la maison, son bégaiement rendait ses tentatives d'intimidation parfaitement inoffensives. Ma sœur, émue par sa vulnérabilité, lui avait confectionné une écharpe dont l'invisibilité s'accordait harmonieusement avec sa nature spectrale. Il la portait quotidiennement, fût-ce en pleine canicule estivale. Les petits mots qu'il déposait sur la table de la cuisine, d'une écriture tremblotante qui trahissait sa nervosité, contenaient des réflexions d'une délicatesse insoupçonnée. Il aurait fallu que chaque foyer possédât un fantôme aussi attachant."
+    }
+  },
+  {
+    id: 10, titre: "La grenouille chanteuse", theme: "Musique",
+    niveaux: {
+      1: "Une grenouille verte chante dans notre étang chaque vendredi soir. Elle a une voix incroyable et connaît toutes les chansons populaires. Les autres grenouilles forment un chœur derrière elle. Les voisins apportent des chaises et s'installent pour le concert gratuit. Mon oncle joue de la guitare pour l'accompagner. La grenouille porte un petit nœud papillon rouge. Elle salue le public en sautant très haut à la fin du spectacle. Les journaux locaux ont parlé de ce phénomène étrange. Le maire veut construire une scène au bord de l'étang. La grenouille est devenue la vedette de notre petit village.",
+      2: "Une grenouille au pelage d'un vert éclatant donne un concert dans notre étang chaque vendredi soir depuis le printemps dernier. Elle possède une voix étonnamment puissante et connaît l'intégralité des chansons populaires francophones. Les autres grenouilles, impressionnées par son talent, forment un chœur harmonieux derrière elle. Les voisins enthousiastes apportent leurs propres chaises pliantes et s'installent confortablement pour profiter du spectacle gratuit. Mon oncle musicien l'accompagne à la guitare acoustique avec une complicité remarquable. La grenouille, coquette, arbore un élégant nœud papillon rouge vif. Elle salue chaleureusement son public fidèle en exécutant des sauts impressionnants. Les journaux régionaux ont largement couvert ce phénomène musical inhabituel.",
+      3: "Une grenouille d'un vert éclatant, dont les capacités vocales extraordinaires ont bouleversé la tranquillité de notre village, se produit dans l'étang communal chaque vendredi soir depuis le printemps dernier. Elle possède un répertoire qui engloberait, selon les estimations les plus conservatrices, plusieurs centaines de mélodies francophones. Les batraciens du voisinage, subjugués par ce talent exceptionnel, se sont spontanément constitués en chœur polyphonique. Les habitants, qui avaient d'abord accueilli ce phénomène avec scepticisme, accourent désormais munis de chaises pliantes qu'ils disposent méthodiquement autour de l'étang. Bien que les journalistes eussent abondamment couvert l'événement, aucun scientifique n'a su expliquer comment un amphibien pouvait maîtriser les subtilités de l'interprétation musicale. Le maire envisagerait de faire construire un amphithéâtre permanent."
+    }
+  },
+  {
+    id: 11, titre: "Le pirate allergique", theme: "Aventure",
+    niveaux: {
+      1: "Le capitaine Barbe-Rouge est un pirate très courageux, mais il est allergique à la mer. Il éternue dès qu'il sent l'air salé. Son équipage lui apporte des mouchoirs par dizaines. Il porte un masque sous son chapeau de pirate. Les autres pirates se moquent de lui dans les tavernes. Pourtant, il a trouvé plus de trésors que tous les autres capitaines. Son perroquet lui rappelle de prendre ses médicaments chaque matin. Le médecin du bateau prépare des tisanes contre les allergies. Barbe-Rouge rêve de prendre sa retraite dans les montagnes loin de la mer.",
+      2: "Le capitaine Barbe-Rouge, reconnu comme l'un des pirates les plus courageux de son époque, souffrait malheureusement d'une allergie sévère à l'air marin. Il éternuait violemment dès que les embruns salés atteignaient ses narines sensibles. Son fidèle équipage devait lui fournir des mouchoirs par centaines durant chaque expédition maritime. Il dissimulait un masque protecteur sous son imposant chapeau de pirate. Les capitaines rivaux se moquaient ouvertement de cette faiblesse dans les tavernes portuaires. Malgré ce handicap considérable, il avait découvert davantage de trésors fabuleux que tous ses concurrents réunis. Son perroquet dressé lui rappelait consciencieusement de prendre ses médicaments antihistaminiques chaque matin avant le lever du soleil.",
+      3: "Le capitaine Barbe-Rouge, unanimement reconnu comme l'un des flibustiers les plus intrépides que les océans eussent jamais portés, souffrait paradoxalement d'une allergie foudroyante à l'air salin. Les embruns qui fouettaient le pont de son navire provoquaient chez lui des éternuements si tonitruants qu'ils effrayaient les marsouins. Son équipage dévoué, qui l'avait accompagné dans d'innombrables expéditions, devait approvisionner la cale en mouchoirs avant chaque traversée. Bien qu'il dissimulât un masque thérapeutique sous son bicorne, les capitaines rivaux ne manquaient jamais de railler cette vulnérabilité dans les tavernes. Il n'en demeurait pas moins que ses découvertes surpassaient celles de tous ses contemporains. Son perroquet, qu'il avait dressé avec une patience remarquable, lui rappelait quotidiennement la prise de ses antihistaminiques."
+    }
+  },
+  {
+    id: 12, titre: "La licorne au bureau", theme: "Humour",
+    niveaux: {
+      1: "Une licorne travaille dans le bureau de ma mère depuis lundi. Elle tape sur le clavier avec sa corne brillante. Elle boit du café arc-en-ciel dans une grande tasse blanche. Ses collègues trouvent que ses rapports sont excellents et toujours à temps. Elle range les dossiers avec sa queue soyeuse. Le patron est très content parce qu'elle ne prend jamais de pause. À midi, elle mange une salade de paillettes dorées dans la salle commune. Les clients adorent la rencontrer pendant les réunions importantes. La licorne veut une promotion et un bureau avec une fenêtre. Ma mère dit que c'est la meilleure collègue qu'elle a jamais eue.",
+      2: "Une licorne d'une élégance remarquable a rejoint le bureau de ma mère depuis lundi dernier. Elle tapait habilement sur le clavier avec l'extrémité de sa corne scintillante, produisant un cliquetis mélodieux. Elle sirotait du café aux reflets irisés dans une grande tasse en porcelaine blanche. Ses collègues reconnaissaient unanimement que ses rapports trimestriels étaient irréprochables et systématiquement remis en avance. Elle classait méthodiquement les dossiers volumineux avec sa queue soyeuse aux couleurs chatoyantes. Le directeur se félicitait de cette recrue exceptionnelle qui ne réclamait aucune pause. À midi, elle dégustait une salade parsemée de paillettes comestibles dans la salle commune rénovée.",
+      3: "Une licorne d'une distinction incomparable a intégré l'entreprise où travaille ma mère, bouleversant les habitudes d'un bureau que l'on considérait jusque-là comme parfaitement conventionnel. Elle manipulait le clavier avec l'extrémité de sa corne opalescente, dont le cliquetis produisait une mélodie que ses collègues trouvaient étrangement apaisante. Les rapports qu'elle rédigeait étaient d'une rigueur telle que le directeur, qui n'avait jamais témoigné d'enthousiasme pour quiconque, la félicitait publiquement. Bien qu'elle ne prît aucune pause et qu'elle accomplît le travail de trois employés, elle ne semblait éprouver ni fatigue ni lassitude. Il aurait fallu que les ressources humaines revissent leurs critères d'embauche, car aucun candidat ordinaire ne pourrait désormais soutenir la comparaison."
+    }
+  },
+  {
+    id: 13, titre: "Le dragon enrhumé", theme: "Fantastique",
+    niveaux: {
+      1: "Le dragon du château est tombé malade hier matin. Il tousse et crache de la fumée grise au lieu de belles flammes oranges. Le roi est inquiet parce que le dragon protège le royaume. La reine lui prépare une soupe chaude avec des herbes spéciales. Le petit prince lui lit des histoires pour le distraire. Le dragon éternue et brûle les rideaux de la chambre royale. Le médecin du château lui donne du sirop au miel et au citron. Les chevaliers apportent des couvertures épaisses pour le réchauffer. Le dragon promet de guérir avant l'arrivée des envahisseurs la semaine prochaine.",
+      2: "Le majestueux dragon qui gardait fidèlement le château depuis des siècles est tombé gravement malade hier matin. Au lieu de cracher de puissantes flammes orangées, il ne produisait que des bouffées de fumée grisâtre et malodorante. Le roi, profondément inquiet, a convoqué tous les médecins du royaume pour examiner la créature souffrante. La reine, reconnue pour ses talents culinaires, lui a personnellement préparé une soupe fumante aux herbes médicinales. Chaque fois que le dragon éternuait, les rideaux brodés de la chambre royale prenaient feu instantanément. Les chevaliers dévoués lui ont apporté d'épaisses couvertures tissées pour maintenir sa température corporelle. Le petit prince compatissant lui lisait des récits chevaleresques pour adoucir sa convalescence.",
+      3: "Le majestueux dragon qui assurait la protection du château depuis des siècles immémoriaux a contracté un rhume d'une virulence inédite. Ses flammes, autrefois d'un orange si éclatant qu'elles illuminaient les remparts à des lieues à la ronde, s'étaient réduites à de pitoyables volutes de fumée grisâtre. Le roi, dont l'inquiétude transparaissait malgré les efforts qu'il déployait pour conserver sa contenance, a ordonné que l'on convoquât les plus éminents médecins du royaume. La reine, qui possédait des connaissances herbalistiques transmises depuis des générations, lui a concocté un bouillon dont elle seule connaissait la recette. Bien que le dragon s'efforçât de réprimer ses éternuements, chaque quinte incendiait invariablement les tapisseries que les serviteurs remplaçaient avec une résignation admirable. Il aurait fallu que les envahisseurs reportassent leur offensive."
+    }
+  },
+  {
+    id: 14, titre: "Le yéti à la plage", theme: "Aventure",
+    niveaux: {
+      1: "Un yéti blanc et poilu est venu à la plage pour la première fois. Il a mis de la crème solaire partout sur sa fourrure épaisse. Il a essayé de nager, mais il flotte trop à cause de ses poils. Les enfants construisent des châteaux de sable avec ses grandes mains. Il mange cinq glaces à la vanille en une seule minute. Le soleil est trop chaud pour lui et il devient tout rouge. Un surfeur lui a prêté sa planche, mais le yéti est trop lourd. Il préfère rester sous le parasol et lire des magazines de mode. Le soir, il fait le plus gros bonhomme de sable de la plage entière.",
+      2: "Un imposant yéti à la fourrure blanche et duveteuse a découvert les plaisirs balnéaires pour la première fois de sa longue existence. Il a consciencieusement étalé de la crème solaire sur l'ensemble de sa fourrure épaisse, vidant plusieurs tubes en quelques minutes. Ses tentatives de natation se sont révélées infructueuses, car sa pilosité abondante le faisait flotter comme un bouchon géant. Les enfants émerveillés construisaient d'impressionnants châteaux de sable grâce à ses mains colossales. Il a dévoré cinq cornets de glace à la vanille avec une rapidité déconcertante. Le soleil impitoyable le faisait rougir sous sa fourrure, ce qui le rendait passablement grincheux. Un surfeur audacieux lui a généreusement prêté sa planche, mais celle-ci a immédiatement coulé sous son poids considérable.",
+      3: "Un yéti d'une stature imposante, dont la fourrure immaculée n'avait jamais connu d'autre climat que les blizzards himalayens, a entrepris de découvrir les joies balnéaires pour la toute première fois. Il a méticuleusement enduit l'intégralité de sa toison d'une crème solaire dont il avait épuisé les réserves de la pharmacie locale. Ses tentatives aquatiques se sont avérées désastreuses, sa pilosité extraordinairement dense le transformant en un bouchon insubmersible que les vagues repoussaient vers le rivage. Les enfants, qui l'avaient d'abord contemplé avec une stupéfaction mêlée d'effroi, sollicitèrent bientôt l'aide de ses pattes titanesques pour ériger des forteresses de sable. Bien qu'un surfeur lui eût généreusement prêté sa planche, celle-ci sombra immédiatement sous un poids que les lois de la flottaison ne sauraient tolérer."
+    }
+  },
+  {
+    id: 15, titre: "Le perroquet professeur", theme: "École",
+    niveaux: {
+      1: "Le perroquet de notre école remplace le professeur de français depuis une semaine. Il se perche sur le bureau et récite des conjugaisons parfaites. Les élèves trouvent ses cours plus amusants que les cours habituels. Il distribue les cahiers avec son bec pointu et rapide. Quand un élève fait une erreur, il répète le mot correct trois fois. Il donne des graines de tournesol aux meilleurs élèves en récompense. Le directeur hésite à lui donner un vrai contrat de travail. Le perroquet porte de petites lunettes rondes posées sur son bec. Il écrit au tableau avec une craie coincée sous son aile. Les parents sont très contents des résultats de leurs enfants ce mois-ci.",
+      2: "Le perroquet multicolore de notre école secondaire remplace le professeur de français depuis une semaine entière, et les résultats sont étonnamment positifs. Il se perche majestueusement sur le bureau professoral et récite des conjugaisons impeccables à une vitesse impressionnante. Les élèves, habituellement dissipés, trouvent ses leçons considérablement plus captivantes que les cours traditionnels. Il distribue adroitement les cahiers de grammaire avec son bec acéré et remarquablement précis. Lorsqu'un étudiant commet une faute d'orthographe, il répète inlassablement le mot correct jusqu'à ce que l'élève le mémorise parfaitement. Il récompense généreusement les meilleurs étudiants avec des graines de tournesol soigneusement sélectionnées. Le directeur, impressionné par les progrès fulgurants, envisageait sérieusement de lui accorder un contrat permanent.",
+      3: "Le perroquet aux plumes chatoyantes qui avait été introduit dans notre établissement à titre expérimental assure désormais l'intégralité des cours de français, et les résultats qu'il obtient surpassent toutes les prévisions pédagogiques. Perché sur le bureau avec une prestance qui impressionnerait n'importe quel inspecteur académique, il récite des conjugaisons d'une exactitude irréprochable, y compris celles du subjonctif plus-que-parfait que les enseignants eux-mêmes redoutaient. Les élèves, que l'on considérait auparavant comme irrémédiablement dissipés, manifestent un engouement sans précédent pour ses leçons. Bien que le syndicat des enseignants eût exprimé de vives réserves quant à l'embauche d'un volatile, les parents d'élèves, constatant les progrès spectaculaires de leurs enfants, exigeaient qu'on lui accordât une titularisation. Il faudrait néanmoins que l'administration résolve la question épineuse de sa rémunération."
+    }
+  }
+];
+
+// ===== ERREURS GRAMMATICALES COMMUNES (détection) =====
+const HOMOPHONES = {
+  "a": { match: "à", rule: "« a » est le verbe avoir conjugué (il a). « à » est une préposition (à la maison). Astuce : si on peut remplacer par « avait », c'est « a » sans accent." },
+  "à": { match: "a", rule: "« à » est une préposition. « a » est le verbe avoir. Astuce : si on peut remplacer par « avait », c'est « a » sans accent." },
+  "ou": { match: "où", rule: "« ou » exprime un choix (fromage ou dessert). « où » indique un lieu ou un moment. Astuce : si on peut remplacer par « ou bien », pas d'accent." },
+  "où": { match: "ou", rule: "« où » indique un lieu ou un moment. « ou » exprime un choix. Astuce : si on peut remplacer par « ou bien », c'est « ou » sans accent." },
+  "son": { match: "sont", rule: "« son » est un déterminant possessif (son chat). « sont » est le verbe être au présent (ils sont). Astuce : si on peut remplacer par « étaient », c'est « sont »." },
+  "sont": { match: "son", rule: "« sont » est le verbe être (ils sont). « son » est un déterminant possessif. Astuce : si on peut remplacer par « mon/ton », c'est « son »." },
+  "ses": { match: "ces", rule: "« ses » est un possessif (ses amis = les siens). « ces » est un démonstratif (ces choses-là). Astuce : « ses » peut être remplacé par « mes/tes »." },
+  "ces": { match: "ses", rule: "« ces » est un démonstratif. « ses » est un possessif. Astuce : « ces » peut être remplacé par « ce/cette » au singulier." },
+  "ce": { match: "se", rule: "« ce » est un démonstratif (ce livre). « se » est un pronom réfléchi (il se lave). Astuce : « se » est toujours devant un verbe pronominal." },
+  "se": { match: "ce", rule: "« se » est un pronom réfléchi. « ce » est un démonstratif. Astuce : si on peut remplacer par « me » en changeant de personne, c'est « se »." },
+  "ma": { match: "m'a", rule: "« ma » est un possessif (ma maison). « m'a » = me + a (il m'a dit). Astuce : si on peut remplacer par « m'avait », c'est « m'a » en deux mots." },
+  "on": { match: "ont", rule: "« on » est un pronom sujet (on mange). « ont » est le verbe avoir (ils ont). Astuce : si on peut remplacer par « avaient », c'est « ont »." },
+  "ont": { match: "on", rule: "« ont » est le verbe avoir (ils ont). « on » est un pronom. Astuce : si on peut remplacer par « il/elle », c'est « on »." },
+  "et": { match: "est", rule: "« et » relie deux éléments (pain et beurre). « est » est le verbe être (il est). Astuce : si on peut remplacer par « était », c'est « est »." },
+  "est": { match: "et", rule: "« est » est le verbe être. « et » relie deux éléments. Astuce : si on peut remplacer par « et puis », c'est la conjonction « et »." },
+  "leur": { match: "leurs", rule: "« leur » (singulier) quand chacun possède un seul élément. « leurs » (pluriel) quand il y en a plusieurs. Astuce : vérifier si l'objet possédé est singulier ou pluriel." },
+  "leurs": { match: "leur", rule: "« leurs » est le pluriel de « leur ». On l'utilise quand les objets possédés sont multiples." },
+};
+
+const VERB_ENDINGS = {
+  "er": { pattern: /é$/, wrongPattern: /er$/, rule: "Confusion entre l'infinitif (-er) et le participe passé (-é). Astuce : remplacer par un verbe du 3e groupe (vendre/vendu) pour entendre la différence." },
+  "é": { pattern: /er$/, wrongPattern: /é$/, rule: "Le verbe devrait être à l'infinitif (-er), pas au participe passé (-é). Après une préposition ou un autre verbe conjugué, on utilise l'infinitif." },
+};
+
+// ===== MOTEUR DE CORRECTION =====
+function normalizeText(text) {
+  return text
+    .replace(/[\u2018\u2019\u0060\u00B4]/g, "'")
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/[\u201C\u201D\u00AB\u00BB]/g, '"')
+    .replace(/\u2026/g, "...")
+    .replace(/\u0153/g, "oe")
+    .replace(/\u00C6/g, "AE")
+    .replace(/\u00E6/g, "ae")
+    .trim();
+}
+
+function tokenize(text) {
+  return normalizeText(text)
+    .split(/(\s+|(?=[.,;:!?])|(?<=[.,;:!?]))/)
+    .filter(t => t.trim().length > 0);
+}
+
+function cleanWord(w) {
+  return w.replace(/^[.,;:!?"'()\-]+|[.,;:!?"'()\-]+$/g, '').toLowerCase();
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m + 1}, () => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = Math.min(
+        dp[i-1][j] + 1,
+        dp[i][j-1] + 1,
+        dp[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1)
+      );
+  return dp[m][n];
+}
+
+function classifyError(userWord, expectedWord) {
+  const uClean = cleanWord(userWord);
+  const eClean = cleanWord(expectedWord);
+
+  if (uClean === eClean) return null;
+
+  // Homophone
+  if (HOMOPHONES[eClean] && HOMOPHONES[eClean].match === uClean) {
+    return { type: "grammar", category: "Homophone", explanation: HOMOPHONES[eClean].rule };
+  }
+  if (HOMOPHONES[uClean] && HOMOPHONES[uClean].match === eClean) {
+    return { type: "grammar", category: "Homophone", explanation: HOMOPHONES[uClean].rule };
+  }
+
+  // Accord pluriel
+  if (eClean + 's' === uClean || uClean + 's' === eClean) {
+    return { type: "grammar", category: "Accord en nombre", explanation: `Vérifier l'accord en nombre : le mot attendu est « ${expectedWord} ». Repérer le déterminant ou le sujet pour savoir si c'est singulier ou pluriel.` };
+  }
+  if (eClean.replace(/x$/, '') === uClean || uClean.replace(/x$/, '') === eClean) {
+    return { type: "grammar", category: "Accord en nombre", explanation: `Certains noms/adjectifs prennent un « x » au pluriel (ex : beaux, jeux). Le mot attendu est « ${expectedWord} ».` };
+  }
+
+  // Accord féminin
+  if (eClean + 'e' === uClean || uClean + 'e' === eClean) {
+    return { type: "grammar", category: "Accord en genre", explanation: `Vérifier l'accord en genre : le mot attendu est « ${expectedWord} ». L'adjectif doit s'accorder avec le nom qu'il qualifie.` };
+  }
+
+  // Terminaison verbale -er/-é
+  if ((eClean.endsWith('é') && uClean.endsWith('er') && eClean.slice(0,-1) === uClean.slice(0,-2)) ||
+      (eClean.endsWith('er') && uClean.endsWith('é') && eClean.slice(0,-2) === uClean.slice(0,-1))) {
+    return { type: "grammar", category: "Terminaison verbale", explanation: "Confusion entre le participe passé (-é) et l'infinitif (-er). Astuce : remplacer par « vendre/vendu » pour entendre la bonne terminaison." };
+  }
+  if ((eClean.endsWith('és') && uClean.endsWith('er')) || (eClean.endsWith('ées') && uClean.endsWith('er'))) {
+    return { type: "grammar", category: "Terminaison verbale + accord", explanation: "Le participe passé doit s'accorder et ne pas être confondu avec l'infinitif. Mot attendu : « " + expectedWord + " »." };
+  }
+
+  // Conjugaison
+  const verbEndings = ['e','es','ent','ons','ez','ait','aient','ais'];
+  for (const end of verbEndings) {
+    if (eClean.endsWith(end) && uClean.endsWith(end.slice(0,-1)) || eClean.endsWith(end) && levenshtein(uClean, eClean) <= 2 && uClean.length > 3) {
+      if (levenshtein(uClean, eClean) <= 2 && uClean.length > 4 && eClean.length > 4) {
+        const stem1 = uClean.slice(0, Math.max(3, uClean.length - 4));
+        const stem2 = eClean.slice(0, Math.max(3, eClean.length - 4));
+        if (levenshtein(stem1, stem2) <= 1) {
+          return { type: "grammar", category: "Conjugaison", explanation: `Vérifier la conjugaison. Le mot attendu est « ${expectedWord} ». Identifier le sujet du verbe pour choisir la bonne terminaison.` };
+        }
+      }
+    }
+  }
+
+  // Default: orthographe d'usage
+  if (levenshtein(uClean, eClean) <= 3) {
+    return { type: "usage", category: "Orthographe d'usage", explanation: `Le mot « ${userWord} » s'écrit « ${expectedWord} ». Retenir l'orthographe correcte de ce mot.` };
+  }
+
+  return { type: "usage", category: "Orthographe d'usage", explanation: `Le mot attendu est « ${expectedWord} » et non « ${userWord} ».` };
+}
+
+function correctDictee(userText, expectedText) {
+  const userTokens = tokenize(userText);
+  const expectedTokens = tokenize(expectedText);
+
+  const userWords = userTokens.filter(t => /[a-zA-ZÀ-ÿ]/.test(t));
+  const expectedWords = expectedTokens.filter(t => /[a-zA-ZÀ-ÿ]/.test(t));
+
+  // LCS-based alignment
+  const m = userWords.length, n = expectedWords.length;
+  const dp = Array.from({length: m+1}, () => Array(n+1).fill(0));
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (cleanWord(userWords[i-1]) === cleanWord(expectedWords[j-1])) {
+        dp[i][j] = dp[i-1][j-1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+      }
+    }
+  }
+
+  // Backtrack
+  const alignments = [];
+  let i = m, j = n;
+  while (i > 0 && j > 0) {
+    if (cleanWord(userWords[i-1]) === cleanWord(expectedWords[j-1])) {
+      alignments.unshift({ type: 'match', user: userWords[i-1], expected: expectedWords[j-1], ui: i-1, ei: j-1 });
+      i--; j--;
+    } else if (dp[i-1][j] > dp[i][j-1]) {
+      alignments.unshift({ type: 'extra', user: userWords[i-1], ui: i-1 });
+      i--;
+    } else {
+      alignments.unshift({ type: 'missing', expected: expectedWords[j-1], ei: j-1 });
+      j--;
+    }
+  }
+  while (i > 0) { alignments.unshift({ type: 'extra', user: userWords[i-1], ui: i-1 }); i--; }
+  while (j > 0) { alignments.unshift({ type: 'missing', expected: expectedWords[j-1], ei: j-1 }); j--; }
+
+  // Now find substitutions (close extra+missing pairs)
+  const errors = [];
+  const correctionParts = [];
+  let usageErrors = 0, grammarErrors = 0;
+
+  // Merge adjacent extra/missing into substitutions
+  const merged = [];
+  let idx = 0;
+  while (idx < alignments.length) {
+    if (alignments[idx].type === 'extra' && idx + 1 < alignments.length && alignments[idx+1].type === 'missing') {
+      merged.push({ type: 'substitute', user: alignments[idx].user, expected: alignments[idx+1].expected });
+      idx += 2;
+    } else if (alignments[idx].type === 'missing' && idx + 1 < alignments.length && alignments[idx+1].type === 'extra') {
+      merged.push({ type: 'substitute', user: alignments[idx+1].user, expected: alignments[idx].expected });
+      idx += 2;
+    } else {
+      merged.push(alignments[idx]);
+      idx++;
+    }
+  }
+
+  for (const item of merged) {
+    if (item.type === 'match') {
+      correctionParts.push({ type: 'correct', word: item.expected });
+    } else if (item.type === 'substitute') {
+      const errInfo = classifyError(item.user, item.expected);
+      if (errInfo) {
+        errors.push({ userWord: item.user, expectedWord: item.expected, ...errInfo });
+        if (errInfo.type === 'usage') usageErrors++;
+        else grammarErrors++;
+      }
+      correctionParts.push({ type: 'error', userWord: item.user, expectedWord: item.expected });
+    } else if (item.type === 'missing') {
+      correctionParts.push({ type: 'missing', word: item.expected });
+      errors.push({ userWord: '(manquant)', expectedWord: item.expected, type: 'usage', category: 'Mot manquant', explanation: `Le mot « ${item.expected} » est absent de ta réponse.` });
+      usageErrors++;
+    } else if (item.type === 'extra') {
+      correctionParts.push({ type: 'extra', word: item.user });
+      errors.push({ userWord: item.user, expectedWord: '(aucun)', type: 'usage', category: 'Mot en trop', explanation: `Le mot « ${item.user} » ne devrait pas apparaître à cet endroit.` });
+      usageErrors++;
+    }
+  }
+
+  const totalExpected = expectedWords.length;
+  const totalErrors = errors.length;
+
+  // PFEQ criteria 4 & 5 scores
+  const usageScore = Math.max(0, Math.round(((totalExpected - usageErrors) / totalExpected) * 100));
+  const grammarScore = totalExpected > 0 ? Math.max(0, Math.round(((totalExpected - grammarErrors) / totalExpected) * 100)) : 100;
+  const overallScore = Math.max(0, Math.round(((totalExpected - totalErrors) / totalExpected) * 100));
+
+  return { errors, correctionParts, usageScore, grammarScore, overallScore, totalErrors, totalExpected };
+}
+
+// ===== COMPOSANTS =====
+
+function PimentLevel({ level }) {
+  return React.createElement('span', { style: { fontSize: '1.1rem' } },
+    '🌶️'.repeat(level)
+  );
+}
+
+function DicteeList({ onSelect }) {
+  return React.createElement('div', { className: 'dictee-grid' },
+    DICTEES.map(d =>
+      React.createElement('div', {
+        key: d.id,
+        className: 'dictee-card',
+        onClick: () => onSelect(d)
+      },
+        React.createElement('span', { className: 'dictee-num' }, d.id),
+        React.createElement('div', { className: 'dictee-info' },
+          React.createElement('h3', null, d.titre),
+          React.createElement('p', null, `3 niveaux de difficulté`)
+        ),
+        React.createElement('span', { className: 'dictee-theme' }, d.theme)
+      )
+    )
+  );
+}
+
+function Player({ text, isPlaying, onPlay, onStop }) {
+  const [speed, setSpeed] = useState(0.85);
+  const [mode, setMode] = useState('full');
+  const [currentSegment, setCurrentSegment] = useState(0);
+  const [frenchVoices, setFrenchVoices] = useState([]);
+  const [selectedVoiceIdx, setSelectedVoiceIdx] = useState(-1);
+  const [voicesLoaded, setVoicesLoaded] = useState(false);
+  const synthRef = useRef(window.speechSynthesis);
+
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+
+  // Detect and rank French voices
+  useEffect(() => {
+    const loadVoices = () => {
+      const all = synthRef.current.getVoices();
+      const fr = all.filter(v => v.lang.startsWith('fr'));
+      if (fr.length === 0) return;
+
+      // Score voices: prefer premium/enhanced, then local, then remote
+      const scored = fr.map((v, origIdx) => {
+        let score = 0;
+        const nameLower = v.name.toLowerCase();
+        // Premium/enhanced voices (macOS, iOS)
+        if (nameLower.includes('premium') || nameLower.includes('enhanced') || nameLower.includes('amelie') || nameLower.includes('amélie')) score += 100;
+        if (nameLower.includes('thomas') || nameLower.includes('audrey') || nameLower.includes('aurelie') || nameLower.includes('aurélie')) score += 80;
+        // Google high-quality
+        if (nameLower.includes('google') && nameLower.includes('français')) score += 70;
+        // Microsoft online voices
+        if (nameLower.includes('microsoft') && (nameLower.includes('denise') || nameLower.includes('henri') || nameLower.includes('sylvie'))) score += 75;
+        // Prefer local voices over network
+        if (v.localService) score += 20;
+        // Prefer fr-FR over fr-CA, but fr-CA is still fine
+        if (v.lang === 'fr-FR') score += 10;
+        if (v.lang === 'fr-CA') score += 8;
+        // Penalize obviously robotic names
+        if (nameLower.includes('compact') || nameLower.includes('espeak')) score -= 50;
+        return { voice: v, score, origIdx };
+      });
+
+      scored.sort((a, b) => b.score - a.score);
+      setFrenchVoices(scored);
+      setVoicesLoaded(true);
+
+      // Auto-select best voice
+      if (scored.length > 0) {
+        setSelectedVoiceIdx(0);
+      }
+    };
+
+    loadVoices();
+    synthRef.current.addEventListener('voiceschanged', loadVoices);
+    // Some browsers need a delay
+    const timer = setTimeout(loadVoices, 500);
+
+    return () => {
+      synthRef.current.removeEventListener('voiceschanged', loadVoices);
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const getSelectedVoice = () => {
+    if (selectedVoiceIdx >= 0 && selectedVoiceIdx < frenchVoices.length) {
+      return frenchVoices[selectedVoiceIdx].voice;
+    }
+    return null;
+  };
+
+  const createUtterance = (txt) => {
+    const utterance = new SpeechSynthesisUtterance(txt);
+    const voice = getSelectedVoice();
+    if (voice) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang;
+    } else {
+      utterance.lang = 'fr-FR';
+    }
+    utterance.rate = speed;
+    utterance.pitch = 1.0;
+    return utterance;
+  };
+
+  const handlePlay = () => {
+    synthRef.current.cancel();
+    if (mode === 'full') {
+      const utterance = createUtterance(text);
+      utterance.onend = onStop;
+      utterance.onerror = onStop;
+      synthRef.current.speak(utterance);
+      onPlay();
+    } else {
+      playSentence(currentSegment);
+    }
+  };
+
+  const playSentence = (idx) => {
+    if (idx >= sentences.length) { onStop(); return; }
+    synthRef.current.cancel();
+    const utterance = createUtterance(sentences[idx].trim());
+    utterance.onend = () => { setCurrentSegment(idx + 1); onStop(); };
+    utterance.onerror = onStop;
+    synthRef.current.speak(utterance);
+    setCurrentSegment(idx);
+    onPlay();
+  };
+
+  const handleStop = () => {
+    synthRef.current.cancel();
+    onStop();
+  };
+
+  const handleNext = () => {
+    const next = Math.min(currentSegment + 1, sentences.length - 1);
+    playSentence(next);
+  };
+
+  const handlePrev = () => {
+    const prev = Math.max(currentSegment - 1, 0);
+    playSentence(prev);
+  };
+
+  // Test voice with a short sample
+  const handleTestVoice = () => {
+    synthRef.current.cancel();
+    const utterance = createUtterance("Bonjour, je suis prêt pour la dictée.");
+    synthRef.current.speak(utterance);
+  };
+
+  useEffect(() => {
+    return () => synthRef.current.cancel();
+  }, []);
+
+  const voiceDisplayName = (scored) => {
+    const v = scored.voice;
+    let name = v.name.replace('Microsoft ', '').replace('Google ', '');
+    const quality = scored.score >= 80 ? ' ★' : scored.score >= 50 ? '' : '';
+    const locale = v.lang === 'fr-CA' ? ' (QC)' : v.lang === 'fr-FR' ? ' (FR)' : ` (${v.lang})`;
+    return `${name}${locale}${quality}`;
+  };
+
+  return React.createElement('div', { className: 'player-section' },
+    React.createElement('h3', null, 'Lecteur vocal'),
+
+    // Voice selector row
+    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' } },
+      React.createElement('label', { style: { fontSize: '0.85rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' } }, 'Voix :'),
+      React.createElement('select', {
+        className: 'speed-select',
+        style: { flex: 1, minWidth: 180 },
+        value: selectedVoiceIdx,
+        onChange: (e) => setSelectedVoiceIdx(parseInt(e.target.value))
+      },
+        frenchVoices.length === 0
+          ? React.createElement('option', { value: -1 }, 'Voix par défaut du navigateur')
+          : frenchVoices.map((sv, i) =>
+              React.createElement('option', { key: i, value: i }, voiceDisplayName(sv))
+            )
+      ),
+      React.createElement('button', {
+        onClick: handleTestVoice,
+        style: {
+          background: 'none',
+          border: '1px solid var(--border)',
+          borderRadius: 6,
+          padding: '7px 12px',
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: '0.82rem',
+          cursor: 'pointer',
+          color: 'var(--text-muted)',
+          whiteSpace: 'nowrap'
+        }
+      }, '🔊 Tester'),
+      !voicesLoaded && React.createElement('span', { style: { fontSize: '0.8rem', color: 'var(--orange)' } }, 'Chargement des voix...')
+    ),
+
+    // Tip for better voices
+    frenchVoices.length > 0 && frenchVoices[0].score < 50 && React.createElement('div', {
+      style: { fontSize: '0.8rem', color: 'var(--text-muted)', background: 'var(--orange-bg)', padding: '8px 12px', borderRadius: 6, marginBottom: 14 }
+    }, '💡 Astuce : Sur Mac, va dans Réglages système → Accessibilité → Contenu énoncé → Voix système pour télécharger des voix françaises de meilleure qualité (Amélie, Thomas, Audrey).'),
+
+    // Mode toggle
+    React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 } },
+      React.createElement('div', { className: 'mode-toggle' },
+        React.createElement('button', {
+          className: `mode-btn ${mode === 'full' ? 'active' : ''}`,
+          onClick: () => { handleStop(); setMode('full'); }
+        }, 'Texte complet'),
+        React.createElement('button', {
+          className: `mode-btn ${mode === 'segments' ? 'active' : ''}`,
+          onClick: () => { handleStop(); setMode('segments'); setCurrentSegment(0); }
+        }, 'Phrase par phrase')
+      )
+    ),
+
+    // Play controls
+    React.createElement('div', { className: 'player-controls' },
+      mode === 'segments' && React.createElement('button', {
+        className: 'play-btn',
+        onClick: handlePrev,
+        disabled: currentSegment <= 0,
+        style: { background: '#666', padding: '10px 14px' }
+      }, '◀'),
+      !isPlaying
+        ? React.createElement('button', { className: 'play-btn', onClick: handlePlay }, '▶ Écouter')
+        : React.createElement('button', { className: 'play-btn stop', onClick: handleStop }, '■ Arrêter'),
+      mode === 'segments' && React.createElement('button', {
+        className: 'play-btn',
+        onClick: handleNext,
+        disabled: currentSegment >= sentences.length - 1,
+        style: { background: '#666', padding: '10px 14px' }
+      }, '▶'),
+      mode === 'segments' && React.createElement('span', { className: 'progress-indicator' },
+        `Phrase ${currentSegment + 1} / ${sentences.length}`
+      ),
+      React.createElement('div', { className: 'speed-control' },
+        React.createElement('label', null, 'Vitesse :'),
+        React.createElement('select', {
+          className: 'speed-select',
+          value: speed,
+          onChange: (e) => setSpeed(parseFloat(e.target.value))
+        },
+          React.createElement('option', { value: 0.5 }, 'Très lente (0.5×)'),
+          React.createElement('option', { value: 0.65 }, 'Lente (0.65×)'),
+          React.createElement('option', { value: 0.85 }, 'Normale (0.85×)'),
+          React.createElement('option', { value: 1 }, 'Rapide (1×)'),
+          React.createElement('option', { value: 1.2 }, 'Très rapide (1.2×)')
+        )
+      )
+    )
+  );
+}
+
+function CorrectionView({ result, onRetry }) {
+  const gradeClass = result.overallScore >= 90 ? 'excellent' : result.overallScore >= 75 ? 'good' : result.overallScore >= 55 ? 'ok' : 'poor';
+
+  const pfeqGrade = (score) => {
+    if (score >= 95) return 'A — Excellent';
+    if (score >= 87) return 'B — Très bien';
+    if (score >= 75) return 'C — Bien';
+    if (score >= 60) return 'D — Satisfaisant';
+    return 'E — En progression';
+  };
+
+  return React.createElement('div', { className: 'correction-container' },
+    React.createElement('div', { className: 'grade-card' },
+      React.createElement('div', { className: `grade-circle ${gradeClass}` }, `${result.overallScore}%`),
+      React.createElement('p', { style: { fontWeight: 600, fontSize: '1.1rem', marginBottom: 4 } }, pfeqGrade(result.overallScore)),
+      React.createElement('p', { style: { color: 'var(--text-muted)', fontSize: '0.9rem' } },
+        `${result.totalErrors} erreur${result.totalErrors > 1 ? 's' : ''} sur ${result.totalExpected} mots`
+      ),
+      React.createElement('div', { className: 'grade-details' },
+        React.createElement('div', { className: 'grade-detail-card' },
+          React.createElement('h4', null, 'Critère 4 — Orthographe d\'usage'),
+          React.createElement('div', { className: 'score', style: { color: result.usageScore >= 75 ? 'var(--green)' : 'var(--accent)' } }, `${result.usageScore}%`)
+        ),
+        React.createElement('div', { className: 'grade-detail-card' },
+          React.createElement('h4', null, 'Critère 5 — Orthographe grammaticale'),
+          React.createElement('div', { className: 'score', style: { color: result.grammarScore >= 75 ? 'var(--green)' : 'var(--accent)' } }, `${result.grammarScore}%`)
+        )
+      )
+    ),
+    React.createElement('div', { className: 'correction-text' },
+      React.createElement('h3', null, 'Correction détaillée'),
+      React.createElement('div', { className: 'correction-line' },
+        result.correctionParts.map((part, i) => {
+          if (part.type === 'correct') {
+            return React.createElement('span', { key: i, className: 'word-correct' }, part.word + ' ');
+          }
+          if (part.type === 'error') {
+            return React.createElement('span', { key: i },
+              React.createElement('span', { className: 'word-error' }, part.userWord),
+              ' ',
+              React.createElement('span', { className: 'word-expected' }, part.expectedWord),
+              ' '
+            );
+          }
+          if (part.type === 'missing') {
+            return React.createElement('span', { key: i, className: 'word-missing' }, `[${part.word}] `);
+          }
+          if (part.type === 'extra') {
+            return React.createElement('span', { key: i, className: 'word-error' }, part.word + ' ');
+          }
+          return null;
+        })
+      )
+    ),
+    result.errors.length > 0
+      ? React.createElement('div', { className: 'errors-list' },
+          React.createElement('h3', null, `Explications (${result.errors.length} erreur${result.errors.length > 1 ? 's' : ''})`),
+          result.errors.map((err, i) =>
+            React.createElement('div', { key: i, className: 'error-item' },
+              React.createElement('div', { className: 'error-words' },
+                `« ${err.userWord} » → « ${err.expectedWord} »`
+              ),
+              React.createElement('span', { className: `error-type ${err.type === 'grammar' ? 'grammar' : 'usage'}` },
+                err.category
+              ),
+              React.createElement('div', { className: 'error-explanation' }, err.explanation)
+            )
+          )
+        )
+      : React.createElement('div', { className: 'errors-list' },
+          React.createElement('div', { className: 'no-errors' }, '🎉 Aucune erreur — bravo !')
+        ),
+    React.createElement('button', { className: 'retry-btn', onClick: onRetry }, '↩ Recommencer cette dictée')
+  );
+}
+
+function DicteeView({ dictee, onBack }) {
+  const [level, setLevel] = useState(1);
+  const [userText, setUserText] = useState('');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const text = dictee.niveaux[level];
+
+  const handleSubmit = () => {
+    if (userText.trim().length < 10) return;
+    setResult(correctDictee(userText, text));
+  };
+
+  const handleRetry = () => {
+    setUserText('');
+    setResult(null);
+  };
+
+  const handleLevelChange = (newLevel) => {
+    setLevel(newLevel);
+    setUserText('');
+    setResult(null);
+    window.speechSynthesis.cancel();
+    setIsPlaying(false);
+  };
+
+  return React.createElement('div', null,
+    React.createElement('button', { className: 'back-btn', onClick: onBack }, '← Retour aux dictées'),
+    React.createElement('h2', { style: { fontFamily: "'DM Serif Display', serif", fontSize: '1.6rem', fontWeight: 400, marginBottom: 6 } }, dictee.titre),
+    React.createElement('p', { style: { color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: 20 } }, `Dictée n°${dictee.id} — ${dictee.theme}`),
+
+    React.createElement('div', { className: 'level-selector' },
+      [1,2,3].map(l =>
+        React.createElement('button', {
+          key: l,
+          className: `level-btn ${level === l ? 'active' : ''}`,
+          onClick: () => handleLevelChange(l)
+        },
+          React.createElement('span', { className: 'level-label' }, React.createElement(PimentLevel, { level: l })),
+          React.createElement('span', { className: 'level-desc' },
+            l === 1 ? 'Débutant' : l === 2 ? 'Intermédiaire' : 'Avancé'
+          )
+        )
+      )
+    ),
+
+    React.createElement(Player, {
+      text: text,
+      isPlaying: isPlaying,
+      onPlay: () => setIsPlaying(true),
+      onStop: () => setIsPlaying(false)
+    }),
+
+    !result && React.createElement('div', { className: 'writing-area' },
+      React.createElement('textarea', {
+        value: userText,
+        onChange: (e) => setUserText(e.target.value),
+        placeholder: 'Écoute la dictée, puis écris le texte ici...',
+        spellCheck: false,
+        autoComplete: 'off',
+        autoCorrect: 'off'
+      }),
+      React.createElement('div', { style: { textAlign: 'right', fontSize: '0.82rem', color: 'var(--text-muted)', margin: '6px 0 12px' } },
+        `${userText.split(/\s+/).filter(w => w.length > 0).length} mots`
+      ),
+      React.createElement('button', {
+        className: 'submit-btn',
+        onClick: handleSubmit,
+        disabled: userText.trim().length < 10
+      }, 'Corriger ma dictée')
+    ),
+
+    result && React.createElement(CorrectionView, { result, onRetry: handleRetry })
+  );
+}
+
+function App() {
+  const [view, setView] = useState('list');
+  const [selectedDictee, setSelectedDictee] = useState(null);
+
+  const handleSelect = (dictee) => {
+    setSelectedDictee(dictee);
+    setView('dictee');
+  };
+
+  const handleBack = () => {
+    window.speechSynthesis.cancel();
+    setView('list');
+    setSelectedDictee(null);
+  };
+
+  return React.createElement('div', { className: 'container' },
+    React.createElement('header', null,
+      React.createElement('h1', null, 'Dictées Amusantes'),
+      React.createElement('p', null, '15 dictées avec 3 niveaux de difficulté, lecture vocale et correction automatique PFEQ')
+    ),
+    view === 'list'
+      ? React.createElement(DicteeList, { onSelect: handleSelect })
+      : React.createElement(DicteeView, { dictee: selectedDictee, onBack: handleBack })
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
